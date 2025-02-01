@@ -18,7 +18,10 @@ namespace Ble.Client
     {
         private readonly IDevice _connectedDevice;                              // Pointer for the connected BLE Device
         private readonly List<IService> _servicesList = new List<IService>();   // List for the available Services on the BLE Device
-
+        private readonly Dictionary<Guid, string> _serviceNames = new Dictionary<Guid, string>()
+        {
+            { Guid.Parse("4fafc201-1fb5-459e-8fcc-c5c9c331914b"), "Programming" }
+        };
         public BtServPage(IDevice connectedDevice)                              // constructor (the function that is called when an instance of a class is defined)
         {
             InitializeComponent();
@@ -39,8 +42,24 @@ namespace Ble.Client
                 var servicesListStr = new List<String>();
                 for(int i = 0; i < servicesListReadOnly.Count; i++)                             // Cycle through the found interfaces
                 {
+                    string v = null;
                     _servicesList.Add(servicesListReadOnly[i]);                                 // Write to a list of service interfaces
-                    servicesListStr.Add(servicesListReadOnly[i].Name + ", UUID: " + servicesListReadOnly[i].Id.ToString());                         // Write the name of the services seperately to an array of strings that can be used to populate the list in the GUI
+                    try
+                    {
+                        var k = _serviceNames.TryGetValue(servicesListReadOnly[i].Id, out v);
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    if (v != null)
+                    {
+                        servicesListStr.Add(v + ", UUID: " + servicesListReadOnly[i].Id.ToString());                         // Write the name of the services seperately to an array of strings that can be used to populate the list in the GUID
+                    }
+                    else
+                    {
+                        servicesListStr.Add(servicesListReadOnly[i].Name + ", UUID: " + servicesListReadOnly[i].Id.ToString());                         // Write the name of the services seperately to an array of strings that can be used to populate the list in the GUID
+
+                    }
                 }
                 foundBleServs.ItemsSource = servicesListStr;                                   // Write the found names to the list in the GUI
             }

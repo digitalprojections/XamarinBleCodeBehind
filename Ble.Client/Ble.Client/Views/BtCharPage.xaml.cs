@@ -20,7 +20,10 @@ namespace Ble.Client
         private readonly IService _selectedService;                                     // Pointer to the selected service
         private readonly List<ICharacteristic> _charList = new List<ICharacteristic>(); // List for the available Characteristics on the BLE Device
         private ICharacteristic _char;                                                  // Pointer to the selected characteristic
-
+        private readonly Dictionary<Guid, string> _characteristicNames = new Dictionary<Guid, string>()
+        {
+            { Guid.Parse("beb5483e-36e1-4688-b7f5-ea07361b26a8"), "My Custom Characteristic" }
+        };
         public BtCharPage(IDevice connectedDevice, IService selectedService)            // constructor (the function that is called when an instance of a class is defined)
         {
             InitializeComponent();
@@ -46,9 +49,24 @@ namespace Ble.Client
                     var charListStr = new List<String>();
                     for (int i = 0; i < charListReadOnly.Count; i++)                               // Cycle through available interfaces
                     {
+                            string v = null;
+                        try
+                        {
+                            var k = _characteristicNames.TryGetValue(charListReadOnly[i].Id, out v);
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                        if (v != null)
+                        {
+                            charListStr.Add(v + ", UUID: " + charListReadOnly[i].Id.ToString());                         // Write the name of the services seperately to an array of strings that can be used to populate the list in the GUID
+                        }
+                        else
+                        {
+                            charListStr.Add(charListReadOnly[i].Name + ", UUID: " + charListReadOnly[i].Id.ToString());                         // Write the name of the services seperately to an array of strings that can be used to populate the list in the GUID
+
+                        }
                         _charList.Add(charListReadOnly[i]);                                        // Write to a list of Chars
-                        // IMPORTANT: listview cannot cope with entries that have the exact same name. That is why I added "i" to the beginning of the name. If you add the UUID you can delete "i" again.
-                        charListStr.Add(i.ToString() + ": " + charListReadOnly[i].Name);           // Write to a list of Strings for the GUI
                     }
                     foundBleChars.ItemsSource = charListStr;                                       // Write found Chars to the GUI
                 }
